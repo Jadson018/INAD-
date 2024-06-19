@@ -1,3 +1,6 @@
+#Sistema feito para Polo Imóveis por Jadson Pamplona Viana
+#O INAD+ é um software que trata planilhas e as transforma em gráficos para que o usuário tenha acesso aos dados tratados como solicitado!
+
 import pandas as pd
 import matplotlib.pyplot as plt
 from tkinter import Tk, filedialog, messagebox, Label, Button, Listbox, Scrollbar, SINGLE
