@@ -8,7 +8,7 @@ import locale
 import tkinter as tk
 from PIL import Image, ImageTk
 
-# Configurar o locale para português do Brasil
+# Configurar local para português do Brasil
 locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
 
 
