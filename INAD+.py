@@ -1,5 +1,3 @@
-# Este sistema foi criado por Jadson Pamplona Viana
-
 import pandas as pd
 import matplotlib.pyplot as plt
 from tkinter import Tk, filedialog, messagebox, Label, Button, Listbox, Scrollbar, SINGLE
@@ -46,18 +44,18 @@ class PlanilhaWindow:
             root, text="Selecione a análise desejada:", font=("Arial", 16, "bold"))
         self.label.pack(pady=20)
 
-        self.button1 = Button(root, text="Total Devido por Obra", font=("Arial", 12), bg='#007ACC', fg='white',
-                              activebackground='#005D99', padx=20, pady=10,
+        self.button1 = Button(root, text="Total Devido por Obra", font=("Arial", 12), bg='#B8860B', fg='white',
+                              activebackground='#B8860B', padx=20, pady=10,
                               command=self.selecionar_planilha_obras)
         self.button1.pack(pady=10)
 
-        self.button2 = Button(root, text="Valor Devido por Obra + Data", font=("Arial", 12), bg='#2E8B57', fg='white',
-                              activebackground='#226E42', padx=20, pady=10,
+        self.button2 = Button(root, text="Valor Devido por Obra + Data", font=("Arial", 12), bg='#B8860B', fg='white',
+                              activebackground='#B8860B', padx=20, pady=10,
                               command=self.abrir_tela_valor_por_data)
         self.button2.pack(pady=10)
 
-        self.button3 = Button(root, text="Total Devido por Parcelas + Obra", font=("Arial", 12), bg='#8B0000', fg='white',
-                              activebackground='#6E0000', padx=20, pady=10,
+        self.button3 = Button(root, text="Total Devido por Parcelas + Obra", font=("Arial", 12), bg='#B8860B', fg='white',
+                              activebackground='#B8860B', padx=20, pady=10,
                               command=self.selecionar_planilha_parcelas)
         self.button3.pack(pady=10)
 
@@ -133,9 +131,14 @@ class TelaValorPorData:
         self.entry_fim.pack(pady=5)
 
         self.button_confirmar = Button(self.toplevel, text="Confirmar", font=("Arial", 12), bg='#2E8B57', fg='white',
-                                       activebackground='#226E42', padx=20, pady=10,
+                                       activebackground='#2E8B57', padx=20, pady=10,
                                        command=self.validar_datas_fechar_janela)
         self.button_confirmar.pack(pady=20)
+
+        self.button_voltar = Button(self.toplevel, text="Voltar", font=("Arial", 12), bg='#708090', fg='white',
+                                    activebackground='#708090', padx=20, pady=10,
+                                    command=self.voltar)
+        self.button_voltar.pack(pady=10)
 
     def validar_datas_fechar_janela(self):
         start_date = self.entry_inicio.get()
@@ -162,6 +165,11 @@ class TelaValorPorData:
                 "Erro", "Formato de data inválido. Utilize o formato DD/MM/AAAA.")
         except Exception as e:
             messagebox.showerror("Erro", f"Erro ao validar as datas: {e}")
+
+    def voltar(self):
+        self.toplevel.destroy()
+        self.root.deiconify()
+        self.root.state('zoomed')
 
 
 class TelaSelecaoObra:
@@ -190,21 +198,31 @@ class TelaSelecaoObra:
         for obra in obras:
             self.listbox.insert(tk.END, obra)
 
-        self.button_confirmar = Button(self.toplevel, text="Confirmar", font=("Arial", 12), bg='#8B0000', fg='white',
-                                       activebackground='#6E0000', padx=20, pady=10,
+        self.button_confirmar = Button(self.toplevel, text="Confirmar", font=("Arial", 12), bg='#2E8B57', fg='white',
+                                       activebackground='#2E8B57', padx=20, pady=10,
                                        command=self.selecionar_obra)
         self.button_confirmar.pack(pady=20)
+
+        self.button_voltar = Button(self.toplevel, text="Voltar", font=("Arial", 12), bg='#708090', fg='white',
+                                    activebackground='#708090', padx=20, pady=10,
+                                    command=self.voltar)
+        self.button_voltar.pack(pady=10)
 
     def selecionar_obra(self):
         selected_index = self.listbox.curselection()
         if not selected_index:
             messagebox.showerror("Erro", "Nenhuma obra selecionada.")
             return
-
+        
         selected_obra = self.listbox.get(selected_index)
         self.df_filtrada = self.df[self.df['Obra'] == selected_obra]
         agrupar_por_parcelas_e_obra(self.df_filtrada, selected_obra, self.root)
         self.toplevel.destroy()  # Fecha a janela após processar os dados
+
+    def voltar(self):
+        self.toplevel.destroy()
+        self.root.deiconify()
+        self.root.state('zoomed')
 
 
 def agrupar_dados_e_gerar_grafico(df, groupby_column, title, root):
@@ -251,14 +269,17 @@ def agrupar_dados_e_gerar_grafico(df, groupby_column, title, root):
         manager.window.state('zoomed')
 
         plt.tight_layout()
+
+
         plt.show()
         root.deiconify()  # Mostra a janela anterior após fechar o gráfico
         root.state('zoomed')  # Garantir que a janela fique maximizada
 
     except Exception as e:
-        messagebox.showerror("Erro", f"Erro ao processar os dados: {e}")
-        root.deiconify()  # Mostra a janela anterior em caso de erro
-        root.state('zoomed')  # Garantir que a janela fique maximizada
+        messagebox.showerror("Erro", f"Erro ao gerar o gráfico: {e}")
+
+    root.deiconify()
+    root.state('zoomed')
 
 
 def agrupar_por_obra_e_data(df, start_date, end_date, root):
@@ -280,6 +301,7 @@ def agrupar_por_obra_e_data(df, start_date, end_date, root):
 
     except Exception as e:
         messagebox.showerror("Erro", f"Erro ao processar os dados: {e}")
+
         root.deiconify()  # Mostra a janela anterior em caso de erro
         root.state('zoomed')  # Garantir que a janela fique maximizada
 
@@ -338,14 +360,11 @@ def agrupar_por_parcelas_e_obra(df, obra, root):
 
         plt.tight_layout(pad=3)  # Adicionando um pequeno padding extra
         plt.show()
-        root.deiconify()  # Mostra a janela anterior após fechar o gráfico
-        root.state('zoomed')  # Garantir que a janela fique maximizada
 
     except Exception as e:
         messagebox.showerror("Erro", f"Erro ao processar os dados: {e}")
         root.deiconify()  # Mostra a janela anterior em caso de erro
         root.state('zoomed')  # Garantir que a janela fique maximizada
-
 
 
 if __name__ == "__main__":
