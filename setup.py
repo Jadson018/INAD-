@@ -17,7 +17,7 @@ if sys.platform == "win32":
 
 # Configuração do setup
 setup(name='INAD+',
-      version='1.0',
+      version='2.0',
       description='Analisador de planilhas especificas',
       options={'build_exe': build_exe_options},
       executables=[Executable("INAD+.py", base=base)]
