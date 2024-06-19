@@ -20,31 +20,20 @@ class PlanilhaWindow:
         self.root = root
         self.root.title("Sistema de Análise de Big Data")
         self.root.geometry("400x200")
-        self.root.state('zoomed')  # Maximiza a janela principal
+        self.root.state('zoomed')
 
+        # Código para carregar a imagem de fundo
         try:
-            # Carregar a imagem com Pillow
             original_image = Image.open("polo.png")
-
-            # Converter a imagem para um formato adequado para Tkinter
             background_image = ImageTk.PhotoImage(original_image)
-
-            # Criar um label para a imagem de fundo e configurá-lo para preencher a janela
             self.background_label = tk.Label(root, image=background_image)
-            # Preencher toda a janela com a imagem de fundo
             self.background_label.place(x=0, y=0, relwidth=1, relheight=1)
-
-            # Garantir que a imagem de fundo permaneça atrás dos outros widgets
             self.background_label.lower()
-
-            # Manter uma referência à imagem para evitar que seja coletada pelo garbage collector
             self.background_label.image = background_image
-
         except Exception as e:
             print(f"Erro ao carregar a imagem: {e}")
 
-        self.label = Label(
-            root, text="Selecione a análise desejada:", font=("Arial", 16, "bold"))
+        self.label = Label(root, text="Selecione a análise desejada:", font=("Arial", 16, "bold"))
         self.label.pack(pady=20)
 
         self.button1 = Button(root, text="Total Devido por Obra", font=("Arial", 12), bg='#B8860B', fg='white',
@@ -61,6 +50,14 @@ class PlanilhaWindow:
                               activebackground='#B8860B', padx=20, pady=10,
                               command=self.selecionar_planilha_parcelas)
         self.button3.pack(pady=10)
+
+        # Adicionar protocolo para fechar a janela principal
+        self.root.protocol("WM_DELETE_WINDOW", self.fechar_janela)
+
+    def fechar_janela(self):
+        if messagebox.askokcancel("Fechar", "Deseja sair do programa?"):
+            self.root.destroy()
+            self.root.quit()
 
     def selecionar_planilha_obras(self):
         self.root.withdraw()  # Oculta a janela atual
@@ -115,7 +112,7 @@ class TelaValorPorData:
         self.toplevel = tk.Toplevel(root)
         self.toplevel.title("Valor Devido por Obra + Data")
         self.toplevel.geometry("300x250")
-        self.toplevel.state('zoomed')  # Maximiza a janela secundária
+        self.toplevel.state('zoomed')
 
         self.label_inicio = Label(
             self.toplevel, text="Data de Início:", font=("Arial", 14, "bold"))
@@ -142,6 +139,15 @@ class TelaValorPorData:
                                     activebackground='#708090', padx=20, pady=10,
                                     command=self.voltar)
         self.button_voltar.pack(pady=10)
+
+        # Adicionar protocolo para fechar a janela corretamente
+        self.toplevel.protocol("WM_DELETE_WINDOW", self.fechar_janela)
+
+    def fechar_janela(self):
+        if messagebox.askokcancel("Fechar", "Deseja voltar para a tela anterior?"):
+            self.toplevel.destroy()
+            self.root.deiconify()
+            self.root.state('zoomed')
 
     def validar_datas_fechar_janela(self):
         start_date = self.entry_inicio.get()
@@ -183,7 +189,7 @@ class TelaSelecaoObra:
         self.toplevel = tk.Toplevel(root)
         self.toplevel.title("Seleção de Obra")
         self.toplevel.geometry("400x300")
-        self.toplevel.state('zoomed')  # Maximiza a janela secundária
+        self.toplevel.state('zoomed')
 
         self.label = Label(
             self.toplevel, text="Selecione a Obra:", font=("Arial", 16, "bold"))
@@ -211,6 +217,21 @@ class TelaSelecaoObra:
                                     command=self.voltar)
         self.button_voltar.pack(pady=10)
 
+        # Adicionar protocolo para fechar a janela corretamente
+        self.toplevel.protocol("WM_DELETE_WINDOW", self.fechar_janela)
+
+    def fechar_janela(self):
+        if messagebox.askokcancel("Fechar", "Deseja voltar para a tela principal?"):
+            self.toplevel.destroy()
+            self.root.deiconify()
+            self.root.state('zoomed')
+
+    def fechar_janela(self):
+        if messagebox.askokcancel("Fechar", "Deseja voltar para a tela anterior?"):
+            self.toplevel.destroy()
+            self.root.deiconify()
+            self.root.state('zoomed')
+
     def selecionar_obra(self):
         selected_index = self.listbox.curselection()
         if not selected_index:
@@ -231,8 +252,7 @@ class TelaSelecaoObra:
 def agrupar_dados_e_gerar_grafico(df, groupby_column, title, root):
     try:
         # Agrupando os dados pela coluna especificada e somando os valores da coluna 'Vlr. Parcela'
-        grouped_df = df.groupby(groupby_column)[
-            'Vlr. Parcela'].sum().sort_values()
+        grouped_df = df.groupby(groupby_column)['Vlr. Parcela'].sum().sort_values()
 
         total_value = grouped_df.sum()
 
@@ -242,8 +262,7 @@ def agrupar_dados_e_gerar_grafico(df, groupby_column, title, root):
 
         # Gerando o gráfico de barras horizontais com borda mais larga e cores variadas
         fig, ax = plt.subplots(figsize=(10, 6))
-        bars = ax.barh(grouped_df.index.astype(
-            str), grouped_df.values, color=bar_colors, linewidth=1.5)
+        bars = ax.barh(grouped_df.index.astype(str), grouped_df.values, color=bar_colors, linewidth=1.5)
 
         ax.set_title(title, fontsize=20, pad=20, color='#333333')
         ax.set_ylabel(groupby_column, fontsize=16, color='#333333')
@@ -252,8 +271,7 @@ def agrupar_dados_e_gerar_grafico(df, groupby_column, title, root):
         for bar in bars:
             width = bar.get_width()
             percentage = (width / total_value) * 100
-            label = f'{locale.currency(width, grouping=True)} ({
-                percentage:.2f}%)'
+            label = f'{locale.currency(width, grouping=True)} ({percentage:.2f}%)'
             if width < ax.get_xlim()[1] / 10:
                 ax.text(width * 1.02, bar.get_y() + bar.get_height() / 2,
                         label, ha='left', va='center', color='black', fontsize=12)
@@ -262,8 +280,7 @@ def agrupar_dados_e_gerar_grafico(df, groupby_column, title, root):
                         ha='center', va='center', color='black', fontsize=12)
 
         # Adicionando o valor total fora das barras
-        total_label = f'Total Devido {
-            locale.currency(total_value, grouping=True)}'
+        total_label = f'Total Devido {locale.currency(total_value, grouping=True)}'
         plt.figtext(0.5, 0.01, total_label, ha='center',
                     fontsize=14, weight='bold', color='#333333')
 
@@ -272,14 +289,18 @@ def agrupar_dados_e_gerar_grafico(df, groupby_column, title, root):
         manager.window.state('zoomed')
 
         plt.tight_layout()
-
-
         plt.show()
-        root.deiconify()  # Mostra a janela anterior após fechar o gráfico
-        root.state('zoomed')  # Garantir que a janela fique maximizada
+
+        # Ao fechar o gráfico, restaura a janela principal
+        root.deiconify()
+        root.state('zoomed')
 
     except Exception as e:
         messagebox.showerror("Erro", f"Erro ao gerar o gráfico: {e}")
+
+        # Em caso de erro, restaura a janela principal
+        root.deiconify()
+        root.state('zoomed')
 
     root.deiconify()
     root.state('zoomed')
@@ -363,6 +384,13 @@ def agrupar_por_parcelas_e_obra(df, obra, root):
 
         plt.tight_layout(pad=3)  # Adicionando um pequeno padding extra
         plt.show()
+
+        # Fechar a janela do gráfico ao sair
+        plt.close()
+
+        # Restaurar a janela principal
+        root.deiconify()
+        root.state('zoomed')
 
     except Exception as e:
         messagebox.showerror("Erro", f"Erro ao processar os dados: {e}")
